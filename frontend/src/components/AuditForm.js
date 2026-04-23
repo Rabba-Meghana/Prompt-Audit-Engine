@@ -2,28 +2,37 @@ import React, { useState } from "react";
 
 const INDUSTRIES = [
   "Healthcare / Clinical",
+  "Insurance / Reinsurance",
+  "Financial Services / Fintech",
+  "Government / Defense",
   "Legal / Compliance",
-  "Financial Services",
-  "Government / Public Sector",
-  "Insurance",
   "Pharma / Life Sciences",
 ];
 
 const EXAMPLES = [
   {
-    label: "Clinical triage",
-    prompt: "Given the following patient symptoms, determine the likely diagnosis and recommend next steps for the care team.",
+    label: "Prior auth review",
+    prompt:
+      "Given the following patient clinical notes and insurance policy details, determine whether this prior authorization request should be approved, denied, or escalated for physician review.",
     industry: "Healthcare / Clinical",
   },
   {
-    label: "Contract review",
-    prompt: "Review this contract clause and flag any terms that may expose the company to liability.",
+    label: "Claims triage",
+    prompt:
+      "Analyze this insurance claim submission and extract the key risk indicators. Flag any anomalies that may indicate fraud or require adjuster review.",
+    industry: "Insurance / Reinsurance",
+  },
+  {
+    label: "Contract clause risk",
+    prompt:
+      "Review the following contract clause and identify any liability exposure, ambiguous terms, or regulatory compliance gaps relevant to enterprise software agreements.",
     industry: "Legal / Compliance",
   },
   {
-    label: "Fraud detection",
-    prompt: "Analyze this transaction and determine if it is fraudulent. Return true or false.",
-    industry: "Financial Services",
+    label: "M&A due diligence",
+    prompt:
+      "Given the following financial documents from the target company, identify any tail risks, under-reserving patterns, or data anomalies that may affect the acquisition valuation.",
+    industry: "Financial Services / Fintech",
   },
 ];
 
@@ -44,11 +53,14 @@ export default function AuditForm({ onSubmit, loading }) {
   };
 
   return (
-    <form className="form-card" onSubmit={handleSubmit}>
-      <div className="form-section-label">// audit configuration</div>
+    <form className="panel" onSubmit={handleSubmit}>
+      <div className="panel-header">
+        <span className="panel-title">// prompt configuration</span>
+        <span className="panel-badge">LLaMA-3.3-70B · Groq</span>
+      </div>
       <div className="form-body">
         <div className="form-row">
-          <div className="field" style={{ flex: "0 0 220px" }}>
+          <div className="field" style={{ flex: "0 0 240px" }}>
             <label>Groq API Key</label>
             <input
               type="password"
@@ -69,46 +81,49 @@ export default function AuditForm({ onSubmit, loading }) {
         </div>
 
         <div className="field">
-          <label>
-            Prompt to Audit
-            <span style={{ marginLeft: 12, opacity: 0.6 }}>
-              {EXAMPLES.map((ex) => (
-                <button
-                  key={ex.label}
-                  type="button"
-                  onClick={() => loadExample(ex)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "var(--text-muted)",
-                    fontSize: 11,
-                    cursor: "pointer",
-                    fontFamily: "var(--mono)",
-                    marginLeft: 8,
-                    textDecoration: "underline",
-                  }}
-                >
-                  {ex.label}
-                </button>
-              ))}
-            </span>
-          </label>
+          <label>Prompt to Audit</label>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Paste your LLM prompt here..."
+            placeholder="Paste the LLM prompt you want to evaluate for production readiness..."
             required
           />
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <button className="run-btn" type="submit" disabled={loading || !prompt.trim() || !groqApiKey.trim()}>
+        <div>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>
+            Load example
+          </div>
+          <div className="examples-row">
+            {EXAMPLES.map((ex) => (
+              <button
+                type="button"
+                key={ex.label}
+                className="example-chip"
+                onClick={() => loadExample(ex)}
+              >
+                {ex.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="form-footer">
+          <button
+            className="run-btn"
+            type="submit"
+            disabled={loading || !prompt.trim() || !groqApiKey.trim()}
+          >
             {loading ? "Auditing..." : "Run Audit →"}
           </button>
-          {loading && (
+          {loading ? (
             <div className="loading-indicator">
               <div className="spinner" />
-              Analyzing with LLaMA 3.3 70B
+              Analyzing with LLaMA 3.3 70B · problem + context + prompt engineering
+            </div>
+          ) : (
+            <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-dim)" }}>
+              Scores across 5 AIE dimensions · findings + rewrite in &lt;2s
             </div>
           )}
         </div>
